@@ -2,7 +2,7 @@
 //
 // Image.h : Defines the class operations on images
 //
-// Author - Parag Havaldar
+// Author - Atreya Madhav Joshi
 // Main Image class structure 
 //
 //*****************************************************************************
@@ -188,7 +188,7 @@ public:
 	{
 		int nWidth = 0;
 		int nHeight = 0;
-		int m_nChromaH = 1, m_nChromaV = 1;
+		int m_nChromaH = 4, m_nChromaV = 4;
 		int nFactorW = 4 / m_nChromaH;
 		int nFactorV = 4 / m_nChromaV;
 
@@ -214,6 +214,7 @@ public:
 				{
 					nCrWidth += 3;
 				}
+				//nCrWidth += 3;
 				r = (YUVTORGB[0][0] * nY + YUVTORGB[0][1] * nCb + YUVTORGB[0][2] * nCr);
 				g= (YUVTORGB[1][0] * nY + YUVTORGB[1][1] * nCb + YUVTORGB[1][2] * nCr);
 				b = (YUVTORGB[2][0] * nY + YUVTORGB[2][1] * nCb + YUVTORGB[2][2] * nCr);
@@ -240,6 +241,7 @@ public:
 
 				nYoutPos += 3;
 			}
+			//nCrHeigth++;
 			if (0 == (nCol % nFactorV))
 			{
 				nCrHeigth++;

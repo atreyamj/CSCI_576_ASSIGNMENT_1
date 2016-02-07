@@ -8,7 +8,8 @@
 //*****************************************************************************
 
 #include "Image.h"
-
+#include <iostream>
+using namespace std;
 
 // Constructor and Desctructors
 MyImage::MyImage()
@@ -21,8 +22,17 @@ MyImage::MyImage()
 
 MyImage::~MyImage()
 {
-	if (strlen(Data)>0)
-		delete Data;
+	
+		/*if (Data != NULL &&(Data))
+		{
+
+			if (strlen(Data)>0)
+				delete Data;
+		}*/
+		
+
+	
+
 }
 
 
