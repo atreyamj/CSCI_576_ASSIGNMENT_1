@@ -2,7 +2,7 @@
 //
 // Image.cpp : Defines the class operations on images
 //
-// Author - Parag Havaldar
+// Author - Atreya Madhav Joshi
 // Code used by students as starter code to display and modify images
 //
 //*****************************************************************************
@@ -195,7 +195,7 @@ bool MyImage::Modify(MyImage Src)
 
 
 	this->doRGBtoYUVFromImage(Src);
-
+	this->doYUVtoRGBFromImage();
 
 
 

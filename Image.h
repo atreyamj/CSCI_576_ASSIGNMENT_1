@@ -48,6 +48,9 @@ private:
 	int		Height;					// Height of Image
 	char	ImagePath[_MAX_PATH];	// Image location
 	char*	Data;					// RGB data of the image
+	unsigned char*	YChannelData;
+	unsigned char*	UChannelData;
+	unsigned char*	VChannelData;
 	double RGBTOYUV[3][3] = { 0.299, 0.587, 0.114, /* R */
 		0.596,-0.274,-0.322,	/* G */
 		0.211,-0.523,0.312 }; /* B*/
@@ -72,11 +75,42 @@ public:
 	void	setHeight(const int h) { Height = h; };
 	void	setImageData(const char *img) { Data = (char *)img; };
 	void	setImagePath(const char *path) { strcpy(ImagePath, path); }
+	void	setYChannel( unsigned char *Channel) 
+	{ 
+		YChannelData = Channel;
+
+	}
+	void	setUChannel( unsigned char *Channel)
+	{
+		UChannelData = Channel;
+	
+
+	}
+
+	void	setVChannel( unsigned char *Channel)
+	{
+		VChannelData = Channel;
+		
+
+	}
 	int		getWidth() { return Width; };
 	int		getHeight() { return Height; };
 	char*	getImageData() { return Data; };
 	char*	getImagePath() { return ImagePath; }
+	unsigned char*	getYChannel(const char *Channel)
+	{
+		return YChannelData;
+	}
+	unsigned char*	getUChannel(const char *Channel)
+	{
+		return UChannelData;
+	}
 
+	unsigned char*	getVChannel(const char *Channel)
+	{
+		return VChannelData;
+	}
+	
 
 	// Input Output operations
 	bool	ReadImage();
@@ -90,12 +124,12 @@ public:
 		return true;
 
 	}
-	char** doRGBtoYUVFromImage(MyImage srcImage)
+	void doRGBtoYUVFromImage(MyImage srcImage)
 	{
-		char* YChannel = new char[srcImage.getWidth()*srcImage.getWidth() * 3];
-		char* UChannel = new char[srcImage.getWidth()*srcImage.getWidth() * 3];
-		char* VChannel = new char[srcImage.getWidth()*srcImage.getWidth() * 3];
-		char* YUVChannels[3];
+		unsigned char* YChannel = new unsigned char[srcImage.getWidth()*srcImage.getWidth() * 3];
+		unsigned char* UChannel = new unsigned char[srcImage.getWidth()*srcImage.getWidth() * 3];
+		unsigned char* VChannel = new unsigned char[srcImage.getWidth()*srcImage.getWidth() * 3];
+		unsigned char* YUVChannels[3];
 
 		double * Data = new double[srcImage.getWidth() * srcImage.getHeight() * 3];
 		for (int i = 0; i<(srcImage.getWidth()* srcImage.getHeight() * 3); i++)
@@ -110,17 +144,11 @@ public:
 				int nR = srcImage.Data[(i * srcImage.getWidth() * 3) + j + 2];
 				int nG = srcImage.Data[(i * srcImage.getWidth() * 3) + j + 1];
 				int nB = srcImage.Data[(i * srcImage.getWidth() * 3) + j];
-				YChannel[nYoutPos] = RGBTOYUV[0][0] * nR
-					+ RGBTOYUV[0][1] * nG
-					+ RGBTOYUV[0][2] * nB; // B
+				YChannel[nYoutPos] = (unsigned char)(RGBTOYUV[0][0] * nR + RGBTOYUV[0][1] * nG + RGBTOYUV[0][2] * nB); // B
 
-				UChannel[nYoutPos] = RGBTOYUV[1][0] * nR
-					+ RGBTOYUV[1][1] * nG
-					+ RGBTOYUV[1][2] * nB + 128;
+				UChannel[nYoutPos] = (unsigned char)(RGBTOYUV[1][0] * nR+ RGBTOYUV[1][1] * nG + RGBTOYUV[1][2] * nB + 128);
 
-				VChannel[nYoutPos] = RGBTOYUV[2][0] * nR
-					+ RGBTOYUV[2][1] * nG
-					+ RGBTOYUV[2][2] * nB + 128;
+				VChannel[nYoutPos] = (unsigned char)(RGBTOYUV[2][0] * nR+ RGBTOYUV[2][1] * nG+ RGBTOYUV[2][2] * nB + 128);
 
 
 				nYoutPos++;
@@ -139,63 +167,92 @@ public:
 
 			}
 		}
-
+		setYChannel(YChannel);
+		setUChannel(UChannel);
+		setVChannel(VChannel);
 		YUVChannels[0] = YChannel;
 		YUVChannels[1] = UChannel;
 		YUVChannels[2] = VChannel;
+		//k = 2;
 		for (int i = 0; i < Height*Width * 3; i++)
 		{
 			this->Data[i++] = YUVChannels[0][i];
 			this->Data[i++] = YUVChannels[1][i];
 			this->Data[i] = YUVChannels[2][i];
-
 		}
-		return YUVChannels;
+		
 
 	}
 
-	char* doYUVtoRGBFromImage(MyImage srcImage)
+	void doYUVtoRGBFromImage()
 	{
-		char * YUVData = new char[srcImage.getWidth() * srcImage.getHeight() * 3];
+		int nWidth = 0;
+		int nHeight = 0;
+		int m_nChromaH = 1, m_nChromaV = 1;
+		int nFactorW = 4 / m_nChromaH;
+		int nFactorV = 4 / m_nChromaV;
 
-		double * Data = new double[srcImage.getWidth() * srcImage.getHeight() * 3];
-		for (int i = 0; i<(srcImage.getWidth()* srcImage.getHeight() * 3); i++)
+		int m_nWidth = getWidth();
+		int m_nHeight = getHeight();
+		unsigned char* RGBData = new unsigned char[m_nWidth*m_nHeight* 3];
+		ZeroMemory(RGBData, m_nWidth*m_nHeight * 3);
+		double r =0.0, g = 0.0,b = 0.0;
+		int nYoutPos = 0;
+		int nCrHeigth = 0;
+		for (int nCol = 0; nCol < m_nHeight; nCol++)
 		{
-			Data[i] = (double)srcImage.Data[i];
+
+			int nCrWidth = 0;
+			for (int nWid = 0; nWid < (m_nWidth * 3); nWid += 3)
+			{
+
+				int nY = YChannelData[(nCol * m_nWidth * 3) + nWid];
+				int nCb = UChannelData[(nCrHeigth * m_nWidth * 3) + nCrWidth] - 128;
+				int nCr = VChannelData[(nCrHeigth * m_nWidth * 3) + nCrWidth] - 128;
+
+				if (0 == (nWid % nFactorW))
+				{
+					nCrWidth += 3;
+				}
+				r = (YUVTORGB[0][0] * nY + YUVTORGB[0][1] * nCb + YUVTORGB[0][2] * nCr);
+				g= (YUVTORGB[1][0] * nY + YUVTORGB[1][1] * nCb + YUVTORGB[1][2] * nCr);
+				b = (YUVTORGB[2][0] * nY + YUVTORGB[2][1] * nCb + YUVTORGB[2][2] * nCr);
+				// ITU-R version formul
+				
+				if (r < 0)
+				{
+					r = r*-1.0;
+				}
+				if (g < 0)
+				{
+					g = g*-1.0;
+				}
+				if (b < 0)
+				{
+					b = b*-1.0;
+				}
+				RGBData[nYoutPos + 2] = (unsigned char)r; // R
+
+
+				RGBData[nYoutPos + 1] = (unsigned char)g; // G
+
+				RGBData[nYoutPos] = (unsigned char)b; //B
+
+				nYoutPos += 3;
+			}
+			if (0 == (nCol % nFactorV))
+			{
+				nCrHeigth++;
+			}
+
 		}
-		int k = 1, j = 0;
-		double val = 0.0;
-		for (int i = 0; i < srcImage.getHeight() * srcImage.getWidth() * 3; i++)
+		for (int i = 0; i < m_nWidth*m_nHeight * 3; i++)
 		{
-			val = ((YUVTORGB[j][0] * Data[i + 2]) + (YUVTORGB[j][1] * Data[i + 1]) + (YUVTORGB[j][2] * Data[i]));
-			if (val<0.0)
-			{
-				val = val*-1.0;
-			}
-			if (k == 1)
-			{
-
-				YUVData[i] = (char)val;
-				j++;
-				k++;
-			}
-			else if (k == 2)
-			{
-				YUVData[i] = (char)val;
-				j++;
-				k++;
-			}
-			else if (k == 3)
-			{
-				YUVData[i] = (char)val;
-				j = 0;
-				k = 1;
-			}
-
+			this->Data[i] = RGBData[i];
 		}
-		return YUVData;
-
 	}
+	
+	
 };
 
 #endif //IMAGE_DISPLAY
