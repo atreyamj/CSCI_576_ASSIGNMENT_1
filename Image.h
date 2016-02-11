@@ -380,17 +380,17 @@ public:
 	{
 		//int nWidth = 0;
 		//int nHeight = 0;
-		m_nChromaH = 1, m_nChromaV = 1;
+		m_nChromaH = 4, m_nChromaV = ;
 		int nFactorW = 4 / m_nChromaH;
 		int nFactorV = 4 / m_nChromaV;
 
 		int m_nWidth = getWidth();
 		 int m_nHeight = getHeight();
-		 GetYData(m_nWidth, m_nHeight);
+		// GetYData(m_nWidth, m_nHeight);
 		GetCbData(m_nWidth, m_nHeight);
 		GetCrData(m_nWidth, m_nHeight);
-		m_nWidth = m_nWidthCbCr;
-		m_nHeight = m_nHeightCbCr;
+		//m_nWidth = m_nWidthCbCr;
+		//m_nHeight = m_nHeightCbCr;
 
 		unsigned char* RGBData = new unsigned char[m_nWidth *m_nHeight * 3];
 		//ZeroMemory(RGBData, m_nWidth*m_nHeight * 3);
@@ -404,9 +404,9 @@ public:
 			for (int nWid = 0; nWid < (m_nWidth * 3); nWid += 3)
 			{
 
-				int nY = YChannelDataOut[(nCol * m_nWidth * 3) + nWid];
-				int nCb = UChannelDataOut[(nCrHeigth * m_nWidth * 3) + nCrWidth] - 128;
-				int nCr = VChannelDataOut[(nCrHeigth * m_nWidth * 3) + nCrWidth] - 128;
+				int nY = YChannelData[(nCol * m_nWidth * 3) + nWid];
+				int nCb = UChannelDataOut[(nCrHeigth * m_nWidthCbCr * 3) + nCrWidth] - 128;
+				int nCr = VChannelDataOut[(nCrHeigth * m_nWidthCbCr * 3) + nCrWidth] - 128;
 
 				if (0 == (nWid % nFactorW))
 				{
